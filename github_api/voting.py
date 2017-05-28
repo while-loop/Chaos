@@ -132,7 +132,7 @@ def get_collaborators(api, urn):
     response = api("get", "{}/collaborators".format(repos.get_path(urn)))
     collaborators = []
     if response:
-        return [c["login"] for c in response]
+        collaborators = [c["login"] for c in response]
     return collaborators
 
 
