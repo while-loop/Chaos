@@ -135,7 +135,8 @@ def has_build_passed(api, statuses_url):
 
     if statuses:
         for status in statuses:
-            if (status["state"] is "success") and (status["description"] is "The Travis CI build passed"):
+            if (status["state"] is "success") and \
+            (status["description"] is "The Travis CI build passed"):
                 return True
     return False
 
