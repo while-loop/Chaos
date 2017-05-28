@@ -3,7 +3,7 @@ import unittest
 from unittest.mock import patch
 
 import settings
-from github_api import voting, API
+from github_api import voting, API, repos
 
 
 class TestVotingMethods(unittest.TestCase):
@@ -49,7 +49,7 @@ class TestVotingMethods(unittest.TestCase):
             "expected": []
         }]
 
-        test_path = "/repos/blah/chaos/collaborators"
+        test_path = "{}/collaborators".format(repos.get_path(settings.URN))
 
         for data in test_data:
             class Mocked(API):
@@ -60,12 +60,15 @@ class TestVotingMethods(unittest.TestCase):
 
             api = Mocked("user", "pat")
 
-            self.assertEqual(data["expected"], voting.get_collaborators(api, test_path))
+            self.assertEqual(data["expected"], voting.get_collaborators(api, settings.URN))
 
-    @patch("github_api.get_collaborators.get_")
-    def test_get_user_weight_applies_collab_weight(self, mock_get_collaborators):
+    @patch("github_api.voting.get_collaborators")
+    @patch("github_api.users.get_user")
+    def test_get_user_weight_applies_collab_weight(self, mock_get_user, mock_get_collaborators):
         collaborators = ["johndoe", "dwightschrute"]
+        mock_get_user.return_value = {'created_at': '2012-10-23T21:35:35Z'}
         mock_get_collaborators.return_value = collaborators
+
         voters = [{
             "username": "johndoe",
             "expected": 1.5
@@ -86,3 +89,19 @@ class TestVotingMethods(unittest.TestCase):
         for v in voters:
             self.assertEqual(v["expected"], voting.get_vote_weight(
                 None, v["username"], v["username"] in collaborators))
+
+    @patch("github_api.voting.get_collaborators")
+    @patch("github_api.users.get_user")
+    def test_get_vote_sum_collab_weight(self, mock_get_user, mock_get_collaborators):
+        collaborators = ["johndoe", "dwightschrute"]
+        mock_get_user.return_value = {'created_at': '2012-10-23T21:35:35Z'}
+        mock_get_collaborators.return_value = collaborators
+
+        # 1.5 + 1 + 1 + -0.5     = 3.0
+        # 3.0 - (1 + 1 + 1)      = 0.0
+        self.assertEqual((3.0, 0.0), voting.get_vote_sum(None, {
+            "johndoe": 1,
+            "michaelscott": 1,
+            "jimhalpert": 1,
+            "smittyvb": -1,
+        }))
