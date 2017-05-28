@@ -14,7 +14,7 @@ def create_decryptor(private_location, public_location):
     except FileNotFoundError:
         with open(private_location, "wb") as key_file:
             private_key = rsa.generate_private_key(
-                public_exponent=65537,
+                public_exponent=65537,d
                 key_size=2048,
                 backend=default_backend()
             )
