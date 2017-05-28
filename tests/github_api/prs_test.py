@@ -6,7 +6,7 @@ from github_api import prs, API
 class TestPRMethods(unittest.TestCase):
     def test_statuses_returns_passed_travis_build(self):
         statuses = [{"state": "success",
-                    "description": "The Travis CI build passed"}]
+                    "context": "continuous-integration/travis-ci/pr"}]
         pr = "/repos/test/blah"
 
         class Mocked(API):
@@ -21,7 +21,7 @@ class TestPRMethods(unittest.TestCase):
 
     def test_statuses_returns_failed_travis_build(self):
         statuses = [{"state": "error",
-                    "description": "The Travis CI build failed"}]
+                    "context": "continuous-integration/travis-ci/pr"}]
         pr = "/repos/test/blah"
 
         class Mocked(API):
@@ -35,7 +35,7 @@ class TestPRMethods(unittest.TestCase):
         self.assertFalse(prs.has_build_passed(api, url))
 
         statuses = [{"state": "pending",
-                    "description": "The Travis CI build is in progress"}]
+                    "context": "some_other_context"}]
         pr = "/repos/test/blah"
 
         class Mocked(API):

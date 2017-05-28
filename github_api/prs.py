@@ -149,7 +149,8 @@ def has_build_passed(api, statuses_url):
     if statuses:
         for status in statuses:
             # Check the state and context of the commit status
-            # the state can be a success for Chaosbot statuses, so we double-check context for a Travis CI context
+            # the state can be a success for Chaosbot statuses,
+            # so we double-check context for a Travis CI context
             if (status["state"] == "success") and \
                (status["context"] == "continuous-integration/travis-ci/pr"):
                 return True
