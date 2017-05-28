@@ -19,31 +19,42 @@ class TestPRMethods(unittest.TestCase):
 
         self.assertTrue(prs.has_build_passed(api, url))
 
-    def test_statuses_returns_failed_travis_build(self):
-        statuses = [{"state": "error",
-                    "context": "continuous-integration/travis-ci/pr"}]
+    def test_statuses_returns_failed_travis_build_in_wrong_context(self):
+        test_data = [[{"state": "pending",
+                       "context": "some_other_context"}],
+                     [{"state": "success",
+                       "context": "some_other_context"}],
+                     [{"state": "error",
+                       "context": "some_other_other_context"}],
+                     ]
         pr = "/repos/test/blah"
 
-        class Mocked(API):
-            def __call__(m, method, path, **kwargs):
-                self.assertEqual(pr, path)
-                return statuses
+        for statuses in test_data:
+            class Mocked(API):
+                def __call__(m, method, path, **kwargs):
+                    self.assertEqual(pr, path)
+                    return statuses
 
-        api = Mocked("user", "pat")
-        url = "{}{}".format(api.BASE_URL, pr)
+            api = Mocked("user", "pat")
+            url = "{}{}".format(api.BASE_URL, pr)
 
-        self.assertFalse(prs.has_build_passed(api, url))
+            self.assertFalse(prs.has_build_passed(api, url))
 
-        statuses = [{"state": "pending",
-                    "context": "some_other_context"}]
+    def test_statuses_returns_failed_travis_build_in_correct_context(self):
+        test_data = [[{"state": "error",
+                     "context": "continuous-integration/travis-ci/pr"}],
+                     [{"state": "pending",
+                       "context": "continuous-integration/travis-ci/pr"}],
+                     ]
         pr = "/repos/test/blah"
 
-        class Mocked(API):
-            def __call__(m, method, path, **kwargs):
-                self.assertEqual(pr, path)
-                return statuses
+        for statuses in test_data:
+            class Mocked(API):
+                def __call__(m, method, path, **kwargs):
+                    self.assertEqual(pr, path)
+                    return statuses
 
-        api = Mocked("user", "pat")
-        url = "{}{}".format(api.BASE_URL, pr)
+            api = Mocked("user", "pat")
+            url = "{}{}".format(api.BASE_URL, pr)
 
-        self.assertFalse(prs.has_build_passed(api, url))
+            self.assertFalse(prs.has_build_passed(api, url))
