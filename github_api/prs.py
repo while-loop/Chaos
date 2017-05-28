@@ -146,7 +146,7 @@ def get_ready_prs(api, urn, window):
     than the voting window.  these are prs that are ready to be considered for
     merging """
     open_prs = get_open_prs(api, urn)
-    for pr in open_prs:
+    for pr in open_prs
         pr_num = pr["number"]
 
         now = arrow.utcnow()
