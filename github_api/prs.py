@@ -135,12 +135,21 @@ def get_pr_comments(api, urn, pr_num):
 
 
 def has_build_passed(api, statuses_url):
+    """
+        Check if a Pull request has passed Travis CI builds
+    :param api: github api instance
+    :param statuses_url: full url to the github commit statuses.
+           Given in pr["statuses_url"]
+    :return: true if the commit passed travis build, false if failed or still pending
+    """
     statuses_path = statuses_url.replace(api.BASE_URL, "")
 
     statuses = api("get", statuses_path)
 
     if statuses:
         for status in statuses:
+            # check state is success and description of status
+            # the state can be success for Chaosbot statuses, so we double-check if it a Travis CI
             if (status["state"] == "success") and \
                (status["description"] == "The Travis CI build passed"):
                 return True
