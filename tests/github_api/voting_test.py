@@ -1,12 +1,12 @@
 import unittest
+
 from unittest.mock import patch
 
 import settings
-from github_api import voting
+from github_api import voting, API
 
 
 class TestVotingMethods(unittest.TestCase):
-
     def test_parse_emojis_for_vote(self):
         self.assertEqual(voting.parse_emojis_for_vote(":+1:"), 1)
         self.assertEqual(voting.parse_emojis_for_vote(":-1:"), -1)
@@ -29,3 +29,60 @@ class TestVotingMethods(unittest.TestCase):
         expected_threshold = number_of_wathers * settings.MIN_VOTE_WATCHERS
         self.assertEqual(voting.get_approval_threshold('or', 'not'), expected_threshold)
         mock_get_num_watchers.assert_called_with('or', 'not')
+
+    def test_get_collaborators_parses_github_response_correctly(self):
+        test_data = [{
+            "given": [{
+                "login": "dwightschrute"
+            }, {
+                "login": "jimhalpert"
+            }, {
+                "login": "michaelscott"
+            }
+            ],
+            "expected": ["dwightschrute", "jimhalpert", "michaelscott"]
+        }, {
+            "given": [],
+            "expected": []
+        }, {
+            "given": None,
+            "expected": []
+        }]
+
+        test_path = "/repos/blah/chaos/collaborators"
+
+        for data in test_data:
+            class Mocked(API):
+                def __call__(m, method, path, **kwargs):
+                    self.assertEqual(test_path, path)
+                    self.assertEqual("get", method)
+                    return data["given"]
+
+            api = Mocked("user", "pat")
+
+            self.assertEqual(data["expected"], voting.get_collaborators(api, test_path))
+
+    @patch("github_api.get_collaborators.get_")
+    def test_get_user_weight_applies_collab_weight(self, mock_get_collaborators):
+        collaborators = ["johndoe", "dwightschrute"]
+        mock_get_collaborators.return_value = collaborators
+        voters = [{
+            "username": "johndoe",
+            "expected": 1.5
+        }, {
+            "username": "dwightschrute",
+            "expected": 1.5
+        }, {
+            "username": "smittyvb",
+            "expected": 1.0 / 2.0
+        }, {
+            "username": "jimhalpert",
+            "expected": 1
+        }, {
+            "username": "michaelscott",
+            "expected": 1
+        }]
+
+        for v in voters:
+            self.assertEqual(v["expected"], voting.get_vote_weight(
+                None, v["username"], v["username"] in collaborators))
