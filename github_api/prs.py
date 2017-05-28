@@ -138,7 +138,7 @@ def has_build_passed(api, statuses_url):
     """
         Check if a Pull request has passed Travis CI builds
     :param api: github api instance
-    :param statuses_url: full url to the github commit statuses.
+    :param statuses_url: full url to the github commit status.
            Given in pr["statuses_url"]
     :return: true if the commit passed travis build, false if failed or still pending
     """
@@ -148,10 +148,10 @@ def has_build_passed(api, statuses_url):
 
     if statuses:
         for status in statuses:
-            # check state is success and description of status
-            # the state can be success for Chaosbot statuses, so we double-check if it a Travis CI
+            # Check the state and context of the commit status
+            # the state can be a success for Chaosbot statuses, so we double-check context for a Travis CI context
             if (status["state"] == "success") and \
-               (status["description"] == "The Travis CI build passed"):
+               (status["context"] == "continuous-integration/travis-ci/pr"):
                 return True
     return False
 
