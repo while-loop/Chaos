@@ -166,7 +166,7 @@ def get_ready_prs(api, urn, window):
             # we check if its mergeable if its outside the voting window,
             # because there seems to be a race where a freshly-created PR exists
             # in the paginated list of PRs, but 404s when trying to fetch it
-            # directly
+            # directly.
             mergeable = get_is_mergeable(api, urn, pr_num)
             if mergeable is True:
                 label_pr(api, urn, pr_num, [])
