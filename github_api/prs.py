@@ -9,6 +9,8 @@ from . import exceptions as exc
 from . import misc
 from . import voting
 
+TRAVIS_CI_CONTEXT = "continuous-integration/travis-ci"
+
 
 def merge_pr(api, urn, pr, votes, total, threshold):
     """ merge a pull request, if possible, and use a nice detailed merge commit
@@ -152,7 +154,7 @@ def has_build_passed(api, statuses_url):
             # the state can be a success for Chaosbot statuses,
             # so we double-check context for a Travis CI context
             if (status["state"] == "success") and \
-               (status["context"] == "continuous-integration/travis-ci/pr"):
+               (status["context"].startswith(TRAVIS_CI_CONTEXT)):
                 return True
     return False
 
