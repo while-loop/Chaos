@@ -136,7 +136,7 @@ def get_ready_prs(api, urn, window):
 
         now = arrow.utcnow()
         updated = get_pr_last_updated(pr)
-        if updated is None
+        if updated is None:
             comments.leave_deleted_comment(api, urn, pr["number"])
             close_pr(api, urn, pr)
             continue
