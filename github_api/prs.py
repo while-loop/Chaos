@@ -125,7 +125,7 @@ def get_pr_last_updated(pr_data):
 def get_pr_comments(api, urn, pr_num):
     """ yield all comments on a pr, weirdly excluding the initial pr comment
     itself (the one the owner makes) """
-    params = {
+    params =
         "per_page": settings.DEFAULT_PAGINATION
     }
     path = "/repos/{urn}/issues/{pr}/comments".format(urn=urn, pr=pr_num)
