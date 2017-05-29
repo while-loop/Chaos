@@ -36,9 +36,29 @@ class API(object):
         self._reset = 0
 
     def __call__(self, method, path, **kwargs):
+        """
+        Perform a rest api call and return JSON body
+        :param method: HTTP Method
+        :param path:  API endpoint path
+        :param kwargs:
+        :param params: (optional) Dictionary or bytes to be sent in the
+                       query string for the :class:`Request`.
+        :return: JSON HTTP Response body
+                 `None` if response is not JSON
+        """
         return self.call_with_headers(method, path, **kwargs)[0]
 
     def call_with_headers(self, method, path, **kwargs):
+        """
+        Perform a rest api call and return JSON body and HTTP Response Headers
+        :param method: HTTP Method
+        :param path:  API endpoint path
+        :param kwargs:
+        :param params: (optional) Dictionary or bytes to be sent in the
+                       query string for the :class:`Request`.
+        :return: JSON body and HTTP Response Headers dict,
+                 `None` if response is not JSON
+        """
         # sleep for a cooldown period, so we don't exhaust our api requests in
         # the middle of doing something important
         now = time.time()
