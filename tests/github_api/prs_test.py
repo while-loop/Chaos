@@ -2,6 +2,8 @@ import unittest
 
 from unittest.mock import Mock, call
 
+import settings
+
 from github_api import prs, API
 
 
@@ -24,7 +26,8 @@ class TestPRMethods(unittest.TestCase):
 
         self.assertTrue(prs.has_build_passed(api, url))
 
-        calls = [call('get', '/repos/test/blah')]
+        calls = [call('get', '/repos/test/blah',
+                      params={'per_page': settings.DEFAULT_PAGINATION})]
         api.call_with_headers.assert_has_calls(calls)
         self.assertEqual(1, api.call_with_headers.call_count)
 
@@ -80,9 +83,12 @@ class TestPRMethods(unittest.TestCase):
         url = "{}{}".format(api.BASE_URL, pr)
         self.assertTrue(prs.has_build_passed(api, url))
 
-        calls = [call('get', '/repos/user/repo'),
-                 call('get', '/repositories/repo/statuses/sha?page=2'),
-                 call('get', '/repositories/repo/statuses/sha?page=3')]
+        calls = [call('get', '/repos/user/repo',
+                      params={'per_page': settings.DEFAULT_PAGINATION}),
+                 call('get', '/repositories/repo/statuses/sha?page=2',
+                      params={'per_page': settings.DEFAULT_PAGINATION}),
+                 call('get', '/repositories/repo/statuses/sha?page=3',
+                      params={'per_page': settings.DEFAULT_PAGINATION})]
         api.call_with_headers.assert_has_calls(calls)
         self.assertEqual(3, api.call_with_headers.call_count)
 
@@ -138,10 +144,14 @@ class TestPRMethods(unittest.TestCase):
         url = "{}{}".format(api.BASE_URL, pr)
         self.assertFalse(prs.has_build_passed(api, url))
 
-        calls = [call('get', '/repos/user/repo'),
-                 call('get', '/repositories/repo/statuses/sha?page=2'),
-                 call('get', '/repositories/repo/statuses/sha?page=3'),
-                 call('get', '/repositories/repo/statuses/sha?page=4')]
+        calls = [call('get', '/repos/user/repo',
+                      params={'per_page': settings.DEFAULT_PAGINATION}),
+                 call('get', '/repositories/repo/statuses/sha?page=2',
+                      params={'per_page': settings.DEFAULT_PAGINATION}),
+                 call('get', '/repositories/repo/statuses/sha?page=3',
+                      params={'per_page': settings.DEFAULT_PAGINATION}),
+                 call('get', '/repositories/repo/statuses/sha?page=4',
+                      params={'per_page': settings.DEFAULT_PAGINATION})]
         api.call_with_headers.assert_has_calls(calls)
         self.assertEqual(4, api.call_with_headers.call_count)
 
@@ -185,7 +195,8 @@ class TestPRMethods(unittest.TestCase):
         url = "{}{}".format(api.BASE_URL, pr)
         self.assertFalse(prs.has_build_passed(api, url))
 
-        calls = [call('get', '/repos/user/repo')]
+        calls = [call('get', '/repos/user/repo',
+                      params={'per_page': settings.DEFAULT_PAGINATION})]
         api.call_with_headers.assert_has_calls(calls)
         self.assertEqual(1, api.call_with_headers.call_count)
 
@@ -229,9 +240,12 @@ class TestPRMethods(unittest.TestCase):
         url = "{}{}".format(api.BASE_URL, pr)
         self.assertTrue(prs.has_build_passed(api, url))
 
-        calls = [call('get', '/repos/user/repo'),
-                 call('get', '/repositories/repo/statuses/sha?page=2'),
-                 call('get', '/repositories/repo/statuses/sha?page=3')]
+        calls = [call('get', '/repos/user/repo',
+                      params={'per_page': settings.DEFAULT_PAGINATION}),
+                 call('get', '/repositories/repo/statuses/sha?page=2',
+                      params={'per_page': settings.DEFAULT_PAGINATION}),
+                 call('get', '/repositories/repo/statuses/sha?page=3',
+                      params={'per_page': settings.DEFAULT_PAGINATION})]
         api.call_with_headers.assert_has_calls(calls)
         self.assertEqual(3, api.call_with_headers.call_count)
 

@@ -149,7 +149,8 @@ def has_build_passed(api, statuses_url):
         return True  # no reference to commit statuses, continue PR as normal
 
     statuses_path = statuses_url.replace(api.BASE_URL, "")
-    statuses, headers = api.call_with_headers("get", statuses_path)
+    params = {"per_page": settings.DEFAULT_PAGINATION}
+    statuses, headers = api.call_with_headers("get", statuses_path, params=params)
     ci_status = None
 
     if statuses:
