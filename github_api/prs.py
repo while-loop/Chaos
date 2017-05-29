@@ -142,21 +142,44 @@ def has_build_passed(api, statuses_url):
     :param api: github api instance
     :param statuses_url: full url to the github commit status.
            Given in pr["statuses_url"]
-    :return: true if the commit passed travis build, false if failed or still pending
+    :return: true if the commit passed travis build or no ci builds have been created
+             false if failed or pending
     """
-    statuses_path = statuses_url.replace(api.BASE_URL, "")
+    if statuses_url is None or statuses_url == "":
+        return True  # no reference to commit statuses, continue PR as normal
 
-    statuses = api("get", statuses_path)
+    statuses_path = statuses_url.replace(api.BASE_URL, "")
+    statuses, headers = api.call_with_headers("get", statuses_path)
+    ci_status = None
 
     if statuses:
         for status in statuses:
             # Check the state and context of the commit status
             # the state can be a success for Chaosbot statuses,
             # so we double-check context for a Travis CI context
-            if (status["state"] == "success") and \
-               (status["context"].startswith(TRAVIS_CI_CONTEXT)):
-                return True
-    return False
+            if status["context"].startswith(TRAVIS_CI_CONTEXT):
+                ci_status = status["state"]
+                break
+
+        # we've looped through all status on this page and haven't found a
+        # travis status, check if a `next` page exists
+        if (ci_status is None) and ('Link' in headers):
+            links = {}
+            for l in headers["Link"].split(','):  # split link urls with rel position
+                info = l.split(';')  # split link+relative position in 2
+                if len(info) != 2:
+                    continue
+                links[info[1].strip()] = info[0].replace('<', '').replace('>', '')
+
+            if 'rel="next"' in links:
+                return has_build_passed(api, links['rel="next"'])
+
+        # if we've reached here, there is not a next page
+
+    # if success, return true
+    # if we did not find a ci status in this commit, return true as
+    # a fallback
+    return (ci_status == "success") or (ci_status is None)
 
 
 def get_ready_prs(api, urn, window):
@@ -182,7 +205,7 @@ def get_ready_prs(api, urn, window):
         # existing on the PRs anymore (somehow..still unsolved), and then PRs
         # were not being processed or updated.  do not use this variable in the
         # if-condition that follow it until that has been solved
-        build_passed = has_build_passed(api, pr["statuses_url"])
+        build_passed = has_build_passed(api, pr["statuses_url"])  # noqa: F841
 
         if not is_wip and delta > window:
             # we check if its mergeable if its outside the voting window,

@@ -1,9 +1,10 @@
-import time
-import re
+import logging
 import math
+import re
+import time
+
 import requests
 from requests.auth import HTTPBasicAuth
-import logging
 
 log = logging.getLogger("github_api")
 
@@ -35,6 +36,9 @@ class API(object):
         self._reset = 0
 
     def __call__(self, method, path, **kwargs):
+        return self.call_with_headers(method, path, **kwargs)[0]
+
+    def call_with_headers(self, method, path, **kwargs):
         # sleep for a cooldown period, so we don't exhaust our api requests in
         # the middle of doing something important
         now = time.time()
@@ -72,4 +76,4 @@ class API(object):
         except:
             data = None
 
-        return data
+        return data, h
